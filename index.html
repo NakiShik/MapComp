@@ -55,7 +55,7 @@
     <script
       async
       defer
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDoLzY6DBVoUPPMoCNewEnnp3inyXvCkNE&libraries=places"
+      src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_API_KEY&libraries=places"
     ></script>
     <script>
       let map;
@@ -196,7 +196,7 @@
 
       function fetchHereWeGoCoordinates(name, vicinity) {
         // Replace 'YOUR_HERE_API_KEY' with your actual HERE API key
-        var hereApiKey = "xiNMKXgiyxQg3pzl4vOxd167y8kJEoZ_86SOR1pppSc";
+        var hereApiKey = "YOUR_HERE_API_KEY";
         var url = `https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(
           name + ", " + vicinity
         )}&apiKey=${hereApiKey}`;
