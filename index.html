@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Potsdam Place Details and Nearby Places</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+
+      td {
+        vertical-align: top;
+      }
+
+      button {
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      #map {
+        height: 500px;
+        width: 100%;
+        margin-top: 20px;
+      }
+    </style>
+    <script
+      async
+      defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDoLzY6DBVoUPPMoCNewEnnp3inyXvCkNE&libraries=places"
+    ></script>
+    <script>
+      let map;
+      let markers = [];
+
+      function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+          center: { lat: 52.39635, lng: 13.05796 }, // Initial center (Potsdam)
+          zoom: 13,
+        });
+
+        var placeId = "ChIJt9Y6hM31qEcRm-yqC5j4ZcU";
+        var request = {
+          placeId: placeId,
+          fields: ["address_components", "geometry"],
+        };
+
+        var service = new google.maps.places.PlacesService(map);
+        service.getDetails(request, function (place, status) {
+          if (status == google.maps.places.PlacesServiceStatus.OK) {
+            displayAddressComponents(place);
+            findNearbyPlaces(place.geometry.location);
+          }
+        });
+      }
+
+      function displayAddressComponents(place) {
+        var container = document.getElementById("address-components");
+        container.innerHTML = "";
+
+        var latLng = place.geometry.location;
+        var latLngElement = document.createElement("p");
+        latLngElement.textContent =
+          "Latitude: " + latLng.lat() + ", Longitude: " + latLng.lng();
+        container.appendChild(latLngElement);
+
+        place.address_components.forEach(function (component) {
+          var element = document.createElement("p");
+          element.textContent =
+            component.long_name + " (" + component.types.join(", ") + ")";
+          container.appendChild(element);
+        });
+      }
+
+      function findNearbyPlaces(location) {
+        var selectedType = document.getElementById("placeType").value;
+        var request = {
+          location: location,
+          radius: 3000,
+        };
+
+        if (selectedType && selectedType !== "") {
+          request.type = [selectedType];
+        }
+
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(request, function (results, status) {
+          if (status == google.maps.places.PlacesServiceStatus.OK) {
+            displayNearbyPlaces(results);
+          }
+        });
+      }
+
+      function displayNearbyPlaces(places) {
+        var table = document.createElement("table");
+        table.classList.add("table");
+
+        var tableHeader = document.createElement("thead");
+        var headerRow = document.createElement("tr");
+
+        var nameHeader = document.createElement("th");
+        nameHeader.textContent = "Place Name";
+        headerRow.appendChild(nameHeader);
+
+        var googleCoordsHeader = document.createElement("th");
+        googleCoordsHeader.textContent = "Google Coordinates";
+        headerRow.appendChild(googleCoordsHeader);
+
+        var hereCoordsHeader = document.createElement("th");
+        hereCoordsHeader.textContent = "HERE WeGo Coordinates";
+        headerRow.appendChild(hereCoordsHeader);
+
+        tableHeader.appendChild(headerRow);
+        table.appendChild(tableHeader);
+
+        var tableBody = document.createElement("tbody");
+        places.forEach(function (place) {
+          var row = document.createElement("tr");
+
+          var nameCell = document.createElement("td");
+          nameCell.textContent = place.name + " - " + place.vicinity;
+          row.appendChild(nameCell);
+
+          var googleCoordsCell = document.createElement("td");
+          var latLng = place.geometry.location;
+          googleCoordsCell.textContent =
+            "Lat: " + latLng.lat() + ", Lng: " + latLng.lng();
+          row.appendChild(googleCoordsCell);
+
+          var hereCoordsCell = document.createElement("td");
+          // Fetch coordinates from HERE WeGo Maps API
+          fetchHereWeGoCoordinates(place.name, place.vicinity)
+            .then(function (coords) {
+              hereCoordsCell.textContent =
+                "Lat: " + coords.lat + ", Lng: " + coords.lng;
+              addMarker(coords, "HERE WeGo: " + place.name, "blue");
+            })
+            .catch(function (error) {
+              hereCoordsCell.textContent = "Error fetching coordinates";
+              console.error("Error fetching HERE WeGo coordinates:", error);
+            });
+
+          row.appendChild(hereCoordsCell);
+
+          tableBody.appendChild(row);
+          addMarker(latLng, "Google Maps: " + place.name, "red");
+        });
+
+        table.appendChild(tableBody);
+
+        var container = document.getElementById("nearby-places");
+        container.innerHTML = ""; // Clear previous results
+        container.appendChild(table);
+      }
+
+      function addMarker(location, title, color) {
+        var marker = new google.maps.Marker({
+          position: location,
+          map: map,
+          title: title,
+          icon: {
+            url:
+              "http://maps.google.com/mapfiles/ms/icons/" + color + "-dot.png",
+          },
+        });
+        markers.push(marker);
+      }
+
+      function fetchHereWeGoCoordinates(name, vicinity) {
+        // Replace 'YOUR_HERE_API_KEY' with your actual HERE API key
+        var hereApiKey = "xiNMKXgiyxQg3pzl4vOxd167y8kJEoZ_86SOR1pppSc";
+        var url = `https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(
+          name + ", " + vicinity
+        )}&apiKey=${hereApiKey}`;
+
+        return fetch(url)
+          .then(function (response) {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
+          .then(function (data) {
+            if (data.items && data.items.length > 0) {
+              var location = data.items[0].position;
+              return { lat: location.lat, lng: location.lng };
+            } else {
+              throw new Error("Coordinates not found");
+            }
+          });
+      }
+
+      window.addEventListener("load", function () {
+        initMap();
+      });
+    </script>
+  </head>
+
+  <body>
+    <div class="container">
+      <label for="placeType">Choose a place type:</label>
+      <select id="placeType">
+        <option value="">All Types</option>
+        <option value="accounting">Accounting</option>
+        <option value="airport">Airport</option>
+        <option value="amusement_park">Amusement Park</option>
+        <option value="aquarium">Aquarium</option>
+        <option value="art_gallery">Art Gallery</option>
+        <option value="atm">ATM</option>
+        <option value="bakery">Bakery</option>
+        <option value="bank">Bank</option>
+        <option value="bar">Bar</option>
+        <option value="beauty_salon">Beauty Salon</option>
+        <option value="bicycle_store">Bicycle Store</option>
+        <option value="book_store">Book Store</option>
+        <option value="bowling_alley">Bowling Alley</option>
+        <option value="bus_station">Bus Station</option>
+        <option value="cafe">Cafe</option>
+        <option value="campground">Campground</option>
+        <option value="car_dealer">Car Dealer</option>
+        <option value="car_rental">Car Rental</option>
+        <option value="car_repair">Car Repair</option>
+        <option value="car_wash">Car Wash</option>
+        <option value="casino">Casino</option>
+        <option value="cemetery">Cemetery</option>
+        <option value="church">Church</option>
+        <option value="city_hall">City Hall</option>
+        <option value="clothing_store">Clothing Store</option>
+        <option value="convenience_store">Convenience Store</option>
+        <option value="courthouse">Courthouse</option>
+        <option value="dentist">Dentist</option>
+        <option value="department_store">Department Store</option>
+        <option value="doctor">Doctor</option>
+        <option value="drugstore">Drugstore</option>
+        <option value="electrician">Electrician</option>
+        <option value="electronics_store">Electronics Store</option>
+        <option value="embassy">Embassy</option>
+        <option value="fire_station">Fire Station</option>
+        <option value="florist">Florist</option>
+        <option value="funeral_home">Funeral Home</option>
+        <option value="furniture_store">Furniture Store</option>
+        <option value="gas_station">Gas Station</option>
+        <option value="gym">Gym</option>
+        <option value="hair_care">Hair Care</option>
+        <option value="hardware_store">Hardware Store</option>
+        <option value="hindu_temple">Hindu Temple</option>
+        <option value="home_goods_store">Home Goods Store</option>
+        <option value="hospital">Hospital</option>
+        <option value="insurance_agency">Insurance Agency</option>
+        <option value="jewelry_store">Jewelry Store</option>
+        <option value="laundry">Laundry</option>
+        <option value="lawyer">Lawyer</option>
+        <option value="library">Library</option>
+        <option value="light_rail_station">Light Rail Station</option>
+        <option value="locksmith">Locksmith</option>
+        <option value="lodging">Lodging</option>
+        <option value="meal_delivery">Meal Delivery</option>
+        <option value="meal_takeaway">Meal Takeaway</option>
+        <option value="mosque">Mosque</option>
+        <option value="movie_rental">Movie Rental</option>
+        <option value="movie_theater">Movie Theater</option>
+        <option value="moving_company">Moving Company</option>
+        <option value="museum">Museum</option>
+        <option value="night_club">Night Club</option>
+        <option value="painter">Painter</option>
+        <option value="park">Park</option>
+        <option value="parking">Parking</option>
+        <option value="pet_store">Pet Store</option>
+        <option value="pharmacy">Pharmacy</option>
+        <option value="physiotherapist">Physiotherapist</option>
+        <option value="plumber">Plumber</option>
+        <option value="police">Police</option>
+        <option value="post_office">Post Office</option>
+        <option value="primary_school">Primary School</option>
+        <option value="real_estate_agency">Real Estate Agency</option>
+        <option value="restaurant">Restaurant</option>
+        <option value="roofing_contractor">Roofing Contractor</option>
+        <option value="rv_park">RV Park</option>
+        <option value="school">School</option>
+        <option value="secondary_school">Secondary School</option>
+        <option value="shoe_store">Shoe Store</option>
+        <option value="shopping_mall">Shopping Mall</option>
+        <option value="spa">Spa</option>
+        <option value="stadium">Stadium</option>
+        <option value="storage">Storage</option>
+        <option value="store">Store</option>
+        <option value="subway_station">Subway Station</option>
+        <option value="supermarket">Supermarket</option>
+        <option value="synagogue">Synagogue</option>
+        <option value="taxi_stand">Taxi Stand</option>
+        <option value="tourist_attraction">Tourist Attraction</option>
+        <option value="train_station">Train Station</option>
+        <option value="transit_station">Transit Station</option>
+        <option value="travel_agency">Travel Agency</option>
+        <option value="university">University</option>
+        <option value="veterinary_care">Veterinary Care</option>
+        <option value="zoo">Zoo</option>
+      </select>
+      <button onclick="initMap()">Search</button>
+    </div>
+
+    <div class="container">
+      <h1>Potsdam Address Components</h1>
+      <div id="address-components"></div>
+
+      <h1>Nearby Places</h1>
+      <div id="nearby-places"></div>
+    </div>
+
+    <div id="map"></div>
+  </body>
+</html>
