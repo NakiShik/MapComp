@@ -52,14 +52,28 @@
         margin-top: 20px;
       }
     </style>
-    <script
-      async
-      defer
-      src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_API_KEY&libraries=places"
-    ></script>
     <script>
       let map;
       let markers = [];
+
+      function loadConfig() {
+        fetch('config.json')
+          .then(response => response.json())
+          .then(config => {
+            window.GOOGLE_API_KEY = config.GOOGLE_API_KEY;
+            window.HERE_API_KEY = config.HERE_API_KEY;
+            loadGoogleMapsScript();
+          })
+          .catch(error => console.error('Error loading config:', error));
+      }
+
+      function loadGoogleMapsScript() {
+        var script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${window.GOOGLE_API_KEY}&libraries=places&callback=initMap`;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+      }
 
       function initMap() {
         map = new google.maps.Map(document.getElementById("map"), {
@@ -195,11 +209,9 @@
       }
 
       function fetchHereWeGoCoordinates(name, vicinity) {
-        // Replace 'YOUR_HERE_API_KEY' with your actual HERE API key
-        var hereApiKey = "YOUR_HERE_API_KEY";
         var url = `https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(
           name + ", " + vicinity
-        )}&apiKey=${hereApiKey}`;
+        )}&apiKey=${window.HERE_API_KEY}`;
 
         return fetch(url)
           .then(function (response) {
@@ -218,9 +230,7 @@
           });
       }
 
-      window.addEventListener("load", function () {
-        initMap();
-      });
+      window.addEventListener('load', loadConfig);
     </script>
   </head>
 
