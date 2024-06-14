@@ -250,18 +250,21 @@
     }
 
     function downloadCSV() {
+      var selectedType = document.getElementById("placeType").value;
+      var filterName = selectedType ? selectedType : "All_Types";
+
       var csvContent = "data:text/csv;charset=utf-8,";
       csvContent += "Place Name,Google Coordinates,HERE WeGo Coordinates\n";
 
       placesData.forEach(function (place) {
-        var row = `"${place.name}","${place.googleCoords}","${place.hereCoords}"\n`;
+        var row = `"${place.name}","${place.googleCoords}","${place.hereCoords}"\n"`;
         csvContent += row;
       });
 
       var encodedUri = encodeURI(csvContent);
       var link = document.createElement("a");
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "places.csv");
+      link.setAttribute("download", filterName + "_places.csv");
       document.body.appendChild(link); // Required for Firefox
       link.click();
       document.body.removeChild(link); // Clean up the DOM
