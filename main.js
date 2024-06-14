@@ -303,5 +303,28 @@ function downloadCSV() {
     document.body.removeChild(link); // Clean up the DOM
 }
 
+function searchLocation() {
+    var searchInput = document.getElementById("searchInput").value;
+    var geocoder = new google.maps.Geocoder();
+  
+    geocoder.geocode({ 'address': searchInput }, function (results, status) {
+      if (status === 'OK') {
+        var location = results[0].geometry.location;
+        map.setCenter(location);
+        var request = {
+          location: location,
+          radius: 3000,
+        };
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(request, function (results, status) {
+          if (status == google.maps.places.PlacesServiceStatus.OK) {
+            displayNearbyPlaces(results);
+          }
+        });
+      } else {
+        alert('Geocode was not successful for the following reason: ' + status);
+      }
+    });
+  }
 
 window.addEventListener('load', loadConfig);
