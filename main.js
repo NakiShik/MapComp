@@ -2,6 +2,68 @@ let map;
 let markers = [];
 let placesData = [];
 
+function searchLocationByType() {
+    var selectedType = document.getElementById("placeType").value;
+    if (!selectedType || selectedType === "") {
+        alert('Please select a place type.');
+        return;
+    }
+
+    var searchInput = document.getElementById("searchInput").value;
+    var geocoder = new google.maps.Geocoder();
+
+    geocoder.geocode({ 'address': searchInput }, function (results, status) {
+        if (status === 'OK') {
+            var location = results[0].geometry.location;
+            map.setCenter(location);
+
+            var request = {
+                location: location,
+                radius: 3000,
+                type: [selectedType]
+            };
+
+            var service = new google.maps.places.PlacesService(map);
+            service.nearbySearch(request, function (results, status) {
+                if (status == google.maps.places.PlacesServiceStatus.OK) {
+                    displayNearbyPlaces(results);
+                } else {
+                    alert('Places service returned status: ' + status);
+                }
+            });
+        } else {
+            alert('Geocode was not successful for the following reason: ' + status);
+        }
+    });
+}
+
+
+
+function initAutocomplete() {
+    var searchInput = document.getElementById("searchInput");
+    var autocomplete = new google.maps.places.Autocomplete(searchInput);
+    autocomplete.setFields(["geometry"]);
+
+    autocomplete.addListener("place_changed", function () {
+        var place = autocomplete.getPlace();
+        if (!place.geometry) {
+            console.log("No details available for input: '" + place.name + "'");
+            return;
+        }
+
+        if (place.geometry.viewport) {
+            map.fitBounds(place.geometry.viewport);
+        } else {
+            map.setCenter(place.geometry.location);
+            map.setZoom(17); // Adjust zoom level as needed
+        }
+
+        // Optionally trigger a search based on the selected place
+         searchLocationByType(); // Uncomment if you want to trigger search on place change
+    });
+}
+
+
 function loadConfig() {
     fetch('config.json')
         .then(response => response.json())
@@ -27,20 +89,10 @@ function initMap() {
         zoom: 13,
     });
 
-    var placeId = "ChIJt9Y6hM31qEcRm-yqC5j4ZcU";
-    var request = {
-        placeId: placeId,
-        fields: ["address_components", "geometry"],
-    };
-
-    var service = new google.maps.places.PlacesService(map);
-    service.getDetails(request, function (place, status) {
-        if (status == google.maps.places.PlacesServiceStatus.OK) {
-            displayAddressComponents(place);
-            findNearbyPlaces(place.geometry.location);
-        }
-    });
+    initAutocomplete();
 }
+
+
 
 function displayAddressComponents(place) {
     var container = document.getElementById("address-components");
@@ -75,6 +127,8 @@ function findNearbyPlaces(location) {
     service.nearbySearch(request, function (results, status) {
         if (status == google.maps.places.PlacesServiceStatus.OK) {
             displayNearbyPlaces(results);
+        } else {
+            alert('Places service returned status: ' + status);
         }
     });
 }
@@ -306,25 +360,18 @@ function downloadCSV() {
 function searchLocation() {
     var searchInput = document.getElementById("searchInput").value;
     var geocoder = new google.maps.Geocoder();
-  
+
     geocoder.geocode({ 'address': searchInput }, function (results, status) {
-      if (status === 'OK') {
-        var location = results[0].geometry.location;
-        map.setCenter(location);
-        var request = {
-          location: location,
-          radius: 3000,
-        };
-        var service = new google.maps.places.PlacesService(map);
-        service.nearbySearch(request, function (results, status) {
-          if (status == google.maps.places.PlacesServiceStatus.OK) {
-            displayNearbyPlaces(results);
-          }
-        });
-      } else {
-        alert('Geocode was not successful for the following reason: ' + status);
-      }
+        if (status === 'OK') {
+            var location = results[0].geometry.location;
+            map.setCenter(location);
+            findNearbyPlaces(location);
+        } else {
+            alert('Geocode was not successful for the following reason: ' + status);
+        }
     });
-  }
+}
+
+
 
 window.addEventListener('load', loadConfig);
