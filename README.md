@@ -52,11 +52,11 @@ This web application utilizes Google Maps API and HERE Geocoding & Reverse Geoco
 ### Contributors
 
 - Developed by -
-- Sajal Satsangi
-- N Shikhar
-- Muskan Arya
-- Insha Khan
-- Aashi Chaudhary
-- Nihal saran das duggirala
+- Sajal Satsangi - sajal.satsangi@globallogic.com
+- N Shikhar - nakirekanti.shikhar@globallogic.com
+- Muskan Arya - muskan.arya@globallogic.com
+- Insha Khan - insha.khan@globallogic.com
+- Aashi Chaudhary- aashi.chaudhary@globallogic.com
+- Nihal saran das duggirala - nihal.saran@globallogic.com
 
 ### License
