@@ -84,12 +84,40 @@ function loadGoogleMapsScript() {
 }
 
 function initMap() {
+    // Create a map object without a predefined center
     map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: 52.39635, lng: 13.05796 }, // Initial center (Potsdam)
-        zoom: 13,
+        zoom: 13, // Default zoom
     });
 
+    // Try HTML5 geolocation
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                var pos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                };
+
+                // Set the map's center to the current location
+                map.setCenter(pos);
+            },
+            function() {
+                handleLocationError(true, map.getCenter());
+            }
+        );
+    } else {
+        // Browser doesn't support Geolocation
+        handleLocationError(false, map.getCenter());
+    }
+
     initAutocomplete();
+}
+
+function handleLocationError(browserHasGeolocation, pos) {
+    console.error(browserHasGeolocation ?
+        "Error: The Geolocation service failed." :
+        "Error: Your browser doesn't support geolocation.");
+    map.setCenter(pos); // Fallback to a default position
 }
 
 
