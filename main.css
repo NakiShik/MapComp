@@ -8,6 +8,15 @@ body {
     padding: 20px;
 }
 
+.flex{
+    display: flex;
+    flex-direction: column;
+}
+
+.margin{
+    margin-top: 10px;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
