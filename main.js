@@ -5,7 +5,7 @@ let placesData = [];
 function searchLocationByType() {
     var selectedType = document.getElementById("placeType").value;
     if (!selectedType || selectedType === "") {
-        alert('Please select a place type.');
+    //    alert('Please select a place type.');
         return;
     }
 
