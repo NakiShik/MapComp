@@ -1,9 +1,10 @@
 import React from "react"
+import HomeScreen from "./Home"
 
 function App() {
   return (
     <>
-      <div>Hello World</div>
+      <HomeScreen/>
     </>
   )
 }
