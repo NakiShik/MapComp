@@ -59,3 +59,24 @@ button:hover {
     margin: auto 25%;
     display: flex;
 }
+#searchInput {
+    width: 50%; /* Adjust as needed */
+    padding: 10px;
+    border: 1px solid #dcdcdc;
+    border-radius: 24px; /* This gives the rounded corners */
+    box-shadow: none;
+    box-sizing: border-box;
+    font-size: 16px; /* Adjust as needed */
+    background-color: #fff;
+    outline: none;
+   
+}
+
+#searchInput::placeholder { /* Style for the placeholder text */
+    color: #bbb;
+    opacity: 1; /* Firefox */
+}
+
+#searchInput:focus {
+    border-color: #4d90fe;
+}
