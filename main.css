@@ -55,3 +55,7 @@ button:hover {
     width: 100%;
     margin-top: 20px;
 }
+#title{
+    margin: auto 25%;
+    display: flex;
+}
