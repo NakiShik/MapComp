@@ -37,8 +37,6 @@ function searchLocationByType() {
     });
 }
 
-
-
 function initAutocomplete() {
     var searchInput = document.getElementById("searchInput");
     var autocomplete = new google.maps.places.Autocomplete(searchInput);
@@ -59,10 +57,9 @@ function initAutocomplete() {
         }
 
         // Optionally trigger a search based on the selected place
-         searchLocationByType(); // Uncomment if you want to trigger search on place change
+        searchLocationByType(); // Uncomment if you want to trigger search on place change
     });
 }
-
 
 function loadConfig() {
     fetch('config.json')
@@ -119,8 +116,6 @@ function handleLocationError(browserHasGeolocation, pos) {
         "Error: Your browser doesn't support geolocation.");
     map.setCenter(pos); // Fallback to a default position
 }
-
-
 
 function displayAddressComponents(place) {
     var container = document.getElementById("address-components");
@@ -199,11 +194,6 @@ function displayNearbyPlaces(places) {
     nameHeader.textContent = "Place Name";
     headerRow.appendChild(nameHeader);
 
-    // Add the new column for HERE WeGo Place Name
-    var hereNameHeader = document.createElement("th");
-    hereNameHeader.textContent = "HERE WeGo Place Name";
-    headerRow.appendChild(hereNameHeader);
-
     var googleCoordsHeader = document.createElement("th");
     googleCoordsHeader.textContent = "Google Coordinates";
     headerRow.appendChild(googleCoordsHeader);
@@ -229,11 +219,6 @@ function displayNearbyPlaces(places) {
         nameCell.textContent = place.name + " - " + place.vicinity;
         row.appendChild(nameCell);
 
-        // Add an empty cell for HERE WeGo Place Name
-        var hereNameCell = document.createElement("td");
-        hereNameCell.textContent = "Fetching...";
-        row.appendChild(hereNameCell);
-
         var googleCoordsCell = document.createElement("td");
         var latLng = place.geometry.location;
         googleCoordsCell.textContent =
@@ -245,7 +230,7 @@ function displayNearbyPlaces(places) {
         row.appendChild(hereCoordsCell);
 
         var differenceCell = document.createElement("td");
-        differenceCell.textContent = "Error";
+        differenceCell.textContent = "Calculating...";
         row.appendChild(differenceCell);
 
         tableBody.appendChild(row);
@@ -266,18 +251,6 @@ function displayNearbyPlaces(places) {
                 }
 
                 addMarker(coords, "HERE WeGo: " + place.name, "blue");
-                // Fetch HERE WeGo Place Name and render
-                fetchHereWeGoPlaceName(coords.lat, coords.lng)
-                    .then(function (placeName) {
-                        hereNameCell.textContent = placeName;
-                        if (placeData) {
-                            placeData.hereName = placeName;
-                        }
-                    })
-                    .catch(function (error) {
-                        hereNameCell.textContent = "Error fetching place name";
-                        console.error("Error fetching HERE WeGo place name:", error);
-                    });
             })
             .catch(function (error) {
                 hereCoordsCell.textContent = "Error fetching coordinates";
@@ -290,7 +263,6 @@ function displayNearbyPlaces(places) {
             name: place.name + " - " + place.vicinity,
             googleCoords: "Lat: " + latLng.lat() + ", Lng: " + latLng.lng(),
             hereCoords: "Fetching...",
-            hereName: "Fetching...",
             distance: "Calculating..."
         });
     });
@@ -310,24 +282,8 @@ function displayNearbyPlaces(places) {
 }
 
 function fetchHereWeGoPlaceName(lat, lng) {
-    var url = `https://revgeocode.search.hereapi.com/v1/revgeocode?at=${lat},${lng}&apiKey=${window.HERE_API_KEY}`;
-
-    return fetch(url)
-        .then(function (response) {
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-            return response.json();
-        })
-        .then(function (data) {
-            if (data.items && data.items.length > 0) {
-                return data.items[0].title;
-            } else {
-                throw new Error("Place name not found");
-            }
-        });
+    return Promise.resolve(""); // Return empty string or default value
 }
-
 
 function addMarker(location, title, color) {
     var marker = new google.maps.Marker({
@@ -369,10 +325,10 @@ function downloadCSV() {
     var filterName = selectedType ? selectedType : "All_Types";
 
     var csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Place Name,Google Coordinates,HERE WeGo Place Name,HERE WeGo Coordinates,Coordinate Difference (km)\n";
+    csvContent += "Place Name,Google Coordinates,HERE WeGo Coordinates,Coordinate Difference (km)\n";
 
     placesData.forEach(function (place) {
-        var row = `"${place.name}","${place.googleCoords}","${place.hereName}","${place.hereCoords}","${place.distance}"\n`;
+        var row = `"${place.name}","${place.googleCoords}","${place.hereCoords}","${place.distance}"\n`;
         csvContent += row;
     });
 
@@ -399,7 +355,5 @@ function searchLocation() {
         }
     });
 }
-
-
 
 window.addEventListener('load', loadConfig);
