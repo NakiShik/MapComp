@@ -3,9 +3,16 @@ body {
 }
 
 .container {
-    max-width: 800px;
+    width: 80%;
     margin: 0 auto;
-    padding: 20px;
+    .container {
+        width: 80%;
+        margin: 0 auto;
+        background-color: #f2f2f2;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
 }
 
 .flex{
@@ -79,4 +86,34 @@ button:hover {
 
 #searchInput:focus {
     border-color: #4d90fe;
+}
+
+#placeType {
+    margin-top: 20px;
+    width: 200px; /* Adjust as needed */
+    padding: 10px;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+    box-shadow: none;
+    box-sizing: border-box;
+    font-size: 16px;
+    background-color: #fff;
+    outline: none;
+}
+
+.btn {
+    padding: 10px 20px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+#title {
+    margin: auto 25%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
 }

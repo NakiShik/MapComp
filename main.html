@@ -8,9 +8,9 @@
 </head>
 
 <body>
-    <div id = "title"><h1>Benchmarking places POC</h1></div>
+    <header id = "title"><h1>Benchmarking places POC</h1></header>
 
-    <div class="container flex">
+    <div class="container">
         <div>
             <input type="text" id="searchInput" placeholder="Enter a location">
             <button class="searchInput" onclick="searchLocation()">Search</button>
@@ -115,7 +115,7 @@
                 <option value="veterinary_care">Veterinary Care</option>
                 <option value="zoo">Zoo</option>
             </select>
-            <button onclick="searchLocationByType()">Search by Type</button>
+            <button id="search btn" onclick="searchLocationByType()">Search by Type</button>
         </div>
     </div>
 
