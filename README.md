@@ -19,7 +19,8 @@ This web application utilizes Google Maps API and HERE Geocoding & Reverse Geoco
 ### How to Use
 
 1. **Initial Setup:**
-   - Ensure `config.json` file is correctly configured with your Google API key and HERE API key.
+   - Ensure `.env` file is correctly configured with your Google API key and HERE API key.
+   - Change the `example.env` to `.env` and add the API keys
 
 2. **Loading the Application:**
    - On page load, the application fetches API keys from `config.json` and initializes the Google Maps API with the specified libraries (`places`).
